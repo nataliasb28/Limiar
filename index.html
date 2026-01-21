@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>LIMIAR — MVP 1.1</title>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#0e1320"/>
+  <style>
+    :root {--bg1:#0e1320; --bg2:#1a2238; --gold:#c9b37e; --ink:#eaeaea; --muted:rgba(255,255,255,.72);
+      --card:rgba(255,255,255,.08); --card2:rgba(255,255,255,.06); --line:rgba(255,255,255,.14);}
+    *{box-sizing:border-box}
+    body{margin:0;color:var(--ink);font-family:ui-serif, Georgia, "Times New Roman", serif;
+      background:radial-gradient(1100px 700px at 20% 0%, #1e2a4a 0%, var(--bg1) 45%, var(--bg2) 100%);min-height:100vh;}
+    .wrap{max-width:960px;margin:0 auto;padding:20px 16px 34px}
+    .topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .brand h1{margin:0;font-weight:500;letter-spacing:.06em}
+    .brand .tag{margin-top:6px;color:var(--muted);font-style:italic}
+    .pill{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);padding:10px 12px;border-radius:999px}
+    .pill b{color:var(--gold);font-weight:700}
+    .sceneCard{margin-top:16px;background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--line);border-radius:16px;overflow:hidden}
+    .sceneHead{padding:14px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+    .sceneHead .title{font-size:16px;color:var(--muted)}
+    .btn{appearance:none;border:0;background:var(--gold);color:#1a2238;font-weight:700;padding:10px 14px;border-radius:999px;cursor:pointer}
+    .btn.secondary{background:transparent;color:var(--ink);border:1px solid var(--line)}
+    .btn:active{transform:translateY(1px)}
+    .progress{height:10px;background:rgba(255,255,255,.12);border-radius:999px;overflow:hidden;border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%;width:0%;background:var(--gold)}
+    .scene{position:relative;aspect-ratio:16/10;min-height:320px;background:#0b0f1c}
+    .scene::before{content:"";position:absolute;inset:0;
+      background:
+        radial-gradient(900px 420px at 30% 30%, rgba(201,179,126,.18), transparent 55%),
+        radial-gradient(700px 420px at 70% 60%, rgba(120,180,255,.10), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.06), transparent 40%),
+        url("data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000">  <defs>    <linearGradient id="g" x1="0" x2="0" y1="0" y2="1">      <stop offset="0" stop-color="%23141a2d"/>      <stop offset="1" stop-color="%230b0f1c"/>    </linearGradient>  </defs>  <rect width="100%" height="100%" fill="url(%23g)"/>  <g opacity="0.28">    <rect x="90" y="180" width="520" height="520" rx="22" fill="none" stroke="%23c9b37e" stroke-width="2"/>    <rect x="120" y="220" width="460" height="460" rx="18" fill="none" stroke="%23ffffff" stroke-width="1"/>    <rect x="980" y="210" width="520" height="490" rx="22" fill="none" stroke="%23c9b37e" stroke-width="2"/>    <rect x="1010" y="240" width="460" height="430" rx="18" fill="none" stroke="%23ffffff" stroke-width="1"/>    <rect x="680" y="320" width="240" height="380" rx="22" fill="none" stroke="%23c9b37e" stroke-width="2"/>    <path d="M700 360h200" stroke="%23ffffff" opacity="0.6"/>    <path d="M700 400h200" stroke="%23ffffff" opacity="0.45"/>    <path d="M700 440h200" stroke="%23ffffff" opacity="0.35"/>    <path d="M700 480h200" stroke="%23ffffff" opacity="0.25"/>    <path d="M700 520h200" stroke="%23ffffff" opacity="0.2"/>    <path d="M700 560h200" stroke="%23ffffff" opacity="0.18"/>  </g>  <g opacity="0.35" fill="%23c9b37e">    <circle cx="220" cy="160" r="4"/>    <circle cx="1180" cy="170" r="4"/>    <circle cx="780" cy="290" r="3"/>  </g></svg>") center/cover no-repeat;}
+    .hotspot{position:absolute;width:56px;height:56px;border-radius:999px;border:1px solid rgba(255,255,255,.22);
+      background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);
+      cursor:pointer;transition:transform .15s ease, background .15s ease;user-select:none;}
+    .hotspot:hover{transform:scale(1.03);background:rgba(255,255,255,.11)}
+    .hotspot.done{background:rgba(201,179,126,.20);border-color:rgba(201,179,126,.55)}
+    .label{position:absolute;top:62px;font-size:12px;color:var(--muted);width:140px;left:50%;transform:translateX(-50%);text-align:center}
+    #hs-mesa{left:18%;top:62%} #hs-estante{left:24%;top:28%} #hs-mapa{left:52%;top:34%} #hs-vitral{left:78%;top:26%} #hs-porta{left:70%;top:64%}
+    .legend{padding:14px 14px 16px;display:grid;gap:10px}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}
+    @media(max-width:840px){.grid{grid-template-columns:1fr}}
+    .panel{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px}
+    .panel h3{margin:0 0 8px 0;font-weight:600}
+    .muted{color:var(--muted)}
+    .list{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--line);font-size:13px}
+    .chip.bad{border-color:rgba(255,200,200,.22);background:rgba(255,200,200,.06)}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+    .modal{max-width:720px;width:100%;background:rgba(17,22,40,.98);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:16px}
+    .modal h2{margin:0 0 8px 0;font-weight:600}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .answerBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .note{margin-top:10px;color:var(--muted);font-size:13px}
+    .toast{margin-top:12px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);display:none}
+    .toast.good{border-color:rgba(201,179,126,.45)} .toast.bad{border-color:rgba(255,200,200,.28)}
+    .end{display:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <h1>LIMIAR</h1>
+        <div class="tag">Biblioteca do Limiar — Constitucional (MVP 1.1)</div>
+      </div>
+      <div class="pill">
+        <span>Chaves: <b id="keys">0</b>/10</span>
+        <span>Tempo: <b id="time">00:00</b></span>
+        <button class="btn secondary" id="resetBtn">Recomeçar</button>
+      </div>
+    </div>
+
+    <div class="sceneCard">
+      <div class="sceneHead">
+        <div>
+          <div class="title">Explore o cenário. Cada ponto guarda um fragmento. Ao reunir chaves, a porta cede.</div>
+          <div style="margin-top:10px" class="progress"><div id="bar" class="bar"></div></div>
+          <div class="muted" style="margin-top:8px">Progresso: <span id="pct">0%</span> • Fragmentos instáveis: <span id="unstableCount">0</span></div>
+        </div>
+        <div class="row"><button class="btn" id="hintBtn">Dica</button></div>
+      </div>
+
+      <div class="scene">
+        <div class="hotspot" id="hs-mesa" data-spot="mesa">🗝️<div class="label">Mesa</div></div>
+        <div class="hotspot" id="hs-estante" data-spot="estante">📚<div class="label">Estante</div></div>
+        <div class="hotspot" id="hs-mapa" data-spot="mapa">🗺️<div class="label">Mapa</div></div>
+        <div class="hotspot" id="hs-vitral" data-spot="vitral">✦<div class="label">Vitral</div></div>
+        <div class="hotspot" id="hs-porta" data-spot="porta">🚪<div class="label">Porta</div></div>
+      </div>
+
+      <div class="legend">
+        <div class="grid">
+          <div class="panel">
+            <h3>Diário de exploração</h3>
+            <div class="muted">Acertos viram chaves. Erros viram instáveis para revisão.</div>
+            <div style="margin-top:10px" class="list" id="doneList"></div>
+          </div>
+          <div class="panel">
+            <h3>Fragmentos instáveis</h3>
+            <div class="muted">Toque em um instável para revisitar.</div>
+            <div style="margin-top:10px" class="list" id="unstableList"></div>
+          </div>
+        </div>
+        <div class="panel end" id="endPanel">
+          <h2>🔓 A Porta se Abre</h2>
+          <p id="endText" class="muted"></p>
+          <div class="list" id="scoreChips"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="row">
+        <h2 id="qTitle">Fragmento</h2>
+        <button class="btn secondary" id="closeBtn">Fechar</button>
+      </div>
+      <p id="qText"></p>
+      <div class="answerBtns">
+        <button class="btn" id="trueBtn">Verdadeiro</button>
+        <button class="btn" id="falseBtn">Falso</button>
+      </div>
+      <div class="note">Dica: <span id="qHint"></span></div>
+      <div class="toast" id="toast"></div>
+    </div>
+  </div>
+
+<script>
+const BANK = [{"id": 1, "hotspot": "mesa", "text": "A dignidade da pessoa humana é fundamento da República Federativa do Brasil.", "answer": true, "hint": "Art. 1º, III."}, {"id": 2, "hotspot": "estante", "text": "O Brasil adota a forma de Estado unitário.", "answer": false, "hint": "Estado: federação."}, {"id": 3, "hotspot": "mapa", "text": "O poder constituinte originário é juridicamente limitado.", "answer": false, "hint": "É inicial e ilimitado (juridicamente)."}, {"id": 4, "hotspot": "vitral", "text": "Direitos e garantias fundamentais podem ser abolidos por emenda constitucional.", "answer": false, "hint": "Cláusulas pétreas (art. 60, §4º)."}, {"id": 5, "hotspot": "porta", "text": "A separação dos poderes é cláusula pétrea.", "answer": true, "hint": "Art. 60, §4º, III."}, {"id": 6, "hotspot": "mesa", "text": "Normas constitucionais de eficácia plena produzem efeitos imediatos.", "answer": true, "hint": "Aplicabilidade direta e imediata."}, {"id": 7, "hotspot": "estante", "text": "O controle difuso pode ser exercido por qualquer juiz ou tribunal.", "answer": true, "hint": "Incidental, em casos concretos."}, {"id": 8, "hotspot": "mapa", "text": "Os direitos sociais estão previstos no art. 6º da Constituição.", "answer": true, "hint": "Art. 6º."}, {"id": 9, "hotspot": "vitral", "text": "Todo brasileiro nato pode perder a nacionalidade.", "answer": false, "hint": "Hipóteses são restritas; nem 'todo'."}, {"id": 10, "hotspot": "porta", "text": "A Constituição de 1988 é rígida.", "answer": true, "hint": "Processo de emenda mais solene."}];
+const STATE_KEY = "limiar_mvp11_state";
+
+function pad(n){return String(n).padStart(2,"0");}
+function fmtTime(sec){const m=Math.floor(sec/60), s=sec%60; return pad(m)+":"+pad(s);}
+
+function loadState(){ try{ const raw=localStorage.getItem(STATE_KEY); return raw?JSON.parse(raw):null; }catch(e){ return null; } }
+function saveState(st){ localStorage.setItem(STATE_KEY, JSON.stringify(st)); }
+function freshState(){ return { startTs: Date.now(), answers: {}, correct: {} }; }
+
+let st = loadState() || freshState();
+let currentQ = null;
+
+const keysEl=document.getElementById("keys"), timeEl=document.getElementById("time"), barEl=document.getElementById("bar"),
+pctEl=document.getElementById("pct"), doneList=document.getElementById("doneList"), unstableList=document.getElementById("unstableList"),
+unstableCount=document.getElementById("unstableCount"), overlay=document.getElementById("overlay"), qTitle=document.getElementById("qTitle"),
+qText=document.getElementById("qText"), qHint=document.getElementById("qHint"), toast=document.getElementById("toast"),
+endPanel=document.getElementById("endPanel"), endText=document.getElementById("endText"), scoreChips=document.getElementById("scoreChips");
+
+function updateTimer(){ const sec=Math.max(0, Math.floor((Date.now()-st.startTs)/1000)); timeEl.textContent=fmtTime(sec); }
+setInterval(updateTimer, 500);
+
+function spotName(s){ return ({mesa:"Mesa", estante:"Estante", mapa:"Mapa", vitral:"Vitral", porta:"Porta"})[s] || s; }
+function mkChip(text, bad=false){ const d=document.createElement("div"); d.className="chip"+(bad?" bad":""); d.textContent=text; return d; }
+function tally(){
+  const answered=Object.keys(st.answers).length;
+  const correct=Object.keys(st.correct).filter(id=>st.correct[id]===true).length;
+  const wrong=Object.keys(st.correct).filter(id=>st.correct[id]===false).length;
+  return {answered, correct, wrong};
+}
+function pickNextQuestion(spot){
+  const list=BANK.filter(q=>q.hotspot===spot);
+  let q=list.find(x=>st.answers[x.id]===undefined);
+  if(!q) q=list.find(x=>st.correct[x.id]===false) || list[0];
+  return q;
+}
+function openModal(q){
+  currentQ=q;
+  qTitle.textContent=`Fragmento ${q.id}/10 — ${spotName(q.hotspot)}`;
+  qText.textContent=q.text;
+  qHint.textContent=q.hint || "—";
+  toast.style.display="none";
+  overlay.style.display="flex";
+}
+function closeModal(){ overlay.style.display="none"; }
+
+function render(){
+  const t=tally();
+  keysEl.textContent=String(t.correct);
+  const prog=Math.round((t.answered/BANK.length)*100);
+  barEl.style.width=prog+"%";
+  pctEl.textContent=prog+"%";
+  unstableCount.textContent=String(t.wrong);
+
+  doneList.innerHTML="";
+  const correctIds=Object.keys(st.correct).filter(id=>st.correct[id]===true).map(Number).sort((a,b)=>a-b);
+  if(correctIds.length===0) doneList.appendChild(mkChip("Nenhuma chave ainda."));
+  correctIds.forEach(id=>{
+    const q=BANK.find(x=>x.id===id);
+    doneList.appendChild(mkChip("✔️ "+id+" — "+spotName(q.hotspot)));
+  });
+
+  unstableList.innerHTML="";
+  const wrongIds=Object.keys(st.correct).filter(id=>st.correct[id]===false).map(Number).sort((a,b)=>a-b);
+  if(wrongIds.length===0) unstableList.appendChild(mkChip("Nenhum instável por enquanto."));
+  wrongIds.forEach(id=>{
+    const q=BANK.find(x=>x.id===id);
+    const chip=mkChip("🔁 "+id+" — "+spotName(q.hotspot), true);
+    chip.style.cursor="pointer";
+    chip.onclick=()=>openModal(q);
+    unstableList.appendChild(chip);
+  });
+
+  document.querySelectorAll(".hotspot").forEach(el=>{
+    const spot=el.getAttribute("data-spot");
+    const list=BANK.filter(q=>q.hotspot===spot);
+    const anyAnswered=list.some(q=>st.answers[q.id]!==undefined);
+    const allCorrect=list.every(q=>st.correct[q.id]===true);
+    el.classList.toggle("done", anyAnswered && allCorrect);
+  });
+
+  if(t.answered===BANK.length){
+    endPanel.style.display="block";
+    const sec=Math.max(0, Math.floor((Date.now()-st.startTs)/1000));
+    const pct=Math.round((t.correct/BANK.length)*100);
+    endText.textContent=`Acertos: ${t.correct}/${BANK.length} • Erros: ${t.wrong} • Precisão: ${pct}% • Tempo: ${fmtTime(sec)}`;
+    scoreChips.innerHTML="";
+    scoreChips.appendChild(mkChip("🗝️ Chaves: "+t.correct));
+    scoreChips.appendChild(mkChip("🎯 Precisão: "+pct+"%"));
+    scoreChips.appendChild(mkChip("⏱️ Tempo: "+fmtTime(sec)));
+  } else {
+    endPanel.style.display="none";
+  }
+
+  saveState(st);
+}
+
+function answer(val){
+  if(!currentQ) return;
+  st.answers[currentQ.id]=val;
+  const ok=(val===currentQ.answer);
+  st.correct[currentQ.id]=ok;
+  toast.className="toast "+(ok?"good":"bad");
+  toast.textContent= ok ? "✔️ Fragmento compreendido. Uma chave foi gravada." : "🔁 Fragmento instável — guarde para revisar.";
+  toast.style.display="block";
+  setTimeout(()=>{ closeModal(); render(); }, 650);
+}
+
+document.querySelectorAll(".hotspot").forEach(el=>{
+  el.addEventListener("click", ()=>{ openModal(pickNextQuestion(el.getAttribute("data-spot"))); });
+});
+document.getElementById("closeBtn").addEventListener("click", closeModal);
+document.getElementById("trueBtn").addEventListener("click", ()=>answer(true));
+document.getElementById("falseBtn").addEventListener("click", ()=>answer(false));
+document.getElementById("resetBtn").addEventListener("click", ()=>{
+  if(confirm("Recomeçar o MVP? Isso apaga seu progresso.")){
+    st=freshState(); saveState(st); render();
+  }
+});
+document.getElementById("hintBtn").addEventListener("click", ()=>{
+  alert("Comece pela Mesa e Estante. Erros ficam em “Fragmentos instáveis” — toque neles para revisar.");
+});
+
+render(); updateTimer();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+</script>
+</body>
+</html>
