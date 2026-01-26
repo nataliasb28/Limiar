@@ -1,117 +1,807 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Limiar — MVP</title>
-<style>
-body {
-  margin: 0;
-  font-family: Georgia, serif;
-  background: #0b0f1a;
-  color: #f2f2ee;
-}
-.screen {
-  display: none;
-  padding: 24px;
-  min-height: 100vh;
-}
-.screen.active {
-  display: block;
-}
-button {
-  background: #1f2638;
-  color: #f2f2ee;
-  border: none;
-  padding: 14px 18px;
-  margin: 8px 0;
-  width: 100%;
-  font-size: 16px;
-}
-.small {
-  opacity: 0.7;
-  font-size: 14px;
-}
-.choice {
-  margin-top: 24px;
-}
-.divider {
-  border-top: 1px solid rgba(255,255,255,0.1);
-  margin: 20px 0;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0f1a">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+  <title>LIMIAR — Ambiente de Estudo</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #070a12;
+      --bg-soft: #141a2a;
+      --accent: #b48b62;
+      --text: #f1efe9;
+      --muted: rgba(241, 239, 233, 0.7);
+      --divider: rgba(241, 239, 233, 0.14);
+      --card: rgba(16, 21, 36, 0.82);
+      --mist: rgba(120, 150, 200, 0.12);
+      --moon: rgba(210, 220, 255, 0.14);
+      --moon-strong: rgba(210, 220, 255, 0.28);
+      --moon-warm: rgba(230, 200, 160, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Georgia", serif;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(180, 210, 255, 0.12) 0%, rgba(7, 10, 18, 0) 45%),
+        radial-gradient(circle at 85% 10%, rgba(255, 210, 170, 0.08) 0%, rgba(7, 10, 18, 0) 50%),
+        linear-gradient(180deg, #0c1220 0%, #070a12 55%, #05070d 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    main {
+      padding: 28px 22px 90px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .screen {
+      display: none;
+      min-height: calc(100vh - 90px);
+      position: relative;
+      z-index: 2;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    h1, h2, h3 {
+      margin: 0 0 12px;
+      font-weight: 500;
+    }
+
+    p {
+      line-height: 1.6;
+      margin: 0 0 16px;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 16px;
+      font-family: inherit;
+      background: #1b2436;
+      color: var(--text);
+      margin-top: 10px;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #26314a;
+    }
+
+    button.secondary {
+      background: transparent;
+      border: 1px solid var(--divider);
+      color: var(--muted);
+    }
+
+    .small {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .divider {
+      border-top: 1px solid var(--divider);
+      margin: 20px 0;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 16px;
+      border-radius: 14px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .menu {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(8, 11, 20, 0.92);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 8px 16px;
+      border-top: 1px solid var(--divider);
+      z-index: 5;
+    }
+
+    .menu button {
+      width: auto;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      margin: 0;
+      font-size: 14px;
+      padding: 6px 12px;
+    }
+
+    .menu button.active {
+      color: var(--text);
+      border-bottom: 2px solid var(--accent);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--accent);
+      border: 1px solid rgba(194, 154, 91, 0.3);
+      margin-bottom: 8px;
+    }
+
+    .ritual {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 80vh;
+    }
+
+    .rain {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+    }
+
+    .rain-toggle {
+      width: auto;
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: 999px;
+      border: 1px solid var(--divider);
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .rain-active {
+      color: var(--accent);
+      border-color: rgba(194, 154, 91, 0.5);
+    }
+
+    .hint-grid button {
+      text-align: left;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 40vh;
+      background: rgba(9, 12, 22, 0.9);
+      border: 1px solid var(--divider);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .status {
+      font-size: 13px;
+      color: var(--accent);
+    }
+
+    .list-item {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .list-item:last-child {
+      border-bottom: none;
+    }
+
+    .ghost {
+      opacity: 0.6;
+    }
+
+    .sky {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(0.2px);
+      box-shadow: 0 0 40px var(--moon-strong);
+      background: radial-gradient(circle at 30% 30%, rgba(240, 245, 255, 0.7) 0%, rgba(200, 210, 245, 0.4) 45%, rgba(140, 160, 210, 0.1) 70%, rgba(7, 10, 18, 0) 100%);
+    }
+
+    .moon.primary {
+      width: 240px;
+      height: 240px;
+      top: -40px;
+      right: -40px;
+      opacity: 0.75;
+    }
+
+    .moon.secondary {
+      width: 140px;
+      height: 140px;
+      top: 40px;
+      right: 140px;
+      opacity: 0.45;
+      box-shadow: 0 0 30px var(--moon-warm);
+      background: radial-gradient(circle at 35% 35%, rgba(255, 235, 210, 0.5) 0%, rgba(220, 190, 150, 0.3) 45%, rgba(10, 12, 20, 0) 70%);
+    }
+
+    .mist {
+      position: absolute;
+      inset: 35% -20% auto -20%;
+      height: 280px;
+      background: radial-gradient(circle at 30% 20%, var(--mist) 0%, rgba(7, 10, 18, 0) 70%);
+      opacity: 0.8;
+    }
+
+    .stars {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(2px 2px at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 60%),
+        radial-gradient(1px 1px at 60% 20%, rgba(255, 255, 255, 0.12) 0%, transparent 60%),
+        radial-gradient(1px 1px at 80% 35%, rgba(255, 255, 255, 0.1) 0%, transparent 60%),
+        radial-gradient(1px 1px at 40% 50%, rgba(255, 255, 255, 0.12) 0%, transparent 60%),
+        radial-gradient(2px 2px at 70% 60%, rgba(255, 255, 255, 0.08) 0%, transparent 60%),
+        radial-gradient(1px 1px at 30% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+      opacity: 0.4;
+    }
+
+    .glow-line {
+      position: absolute;
+      left: -10%;
+      right: -10%;
+      top: 120px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(180, 210, 255, 0.3), transparent);
+      opacity: 0.5;
+    }
+
+    .scene-label {
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(230, 220, 200, 0.55);
+    }
+  </style>
 </head>
 <body>
-
-<div id="start" class="screen active">
-  <p class="small">🔈 Ativar ambiente (chuva)</p>
-  <div style="margin-top:40vh;">
-    <p style="font-size:20px;">
-      Nem tudo precisa ser vencido.<br>
-      Algumas coisas precisam ser atravessadas.
-    </p>
-    <button onclick="go('library')">Entrar</button>
+  <div class="sky" aria-hidden="true">
+    <div class="stars"></div>
+    <div class="moon primary"></div>
+    <div class="moon secondary"></div>
+    <div class="mist"></div>
+    <div class="glow-line"></div>
   </div>
-</div>
+  <main>
+    <section id="screen-start" class="screen active">
+      <div class="rain">
+        <span>🔈 Ambiente</span>
+        <button class="rain-toggle" id="rainToggle">Ativar chuva</button>
+      </div>
+      <div class="ritual">
+        <p class="scene-label">Biblioteca antiga · noite contínua</p>
+        <p style="font-size: 22px;">
+          Nem tudo precisa ser vencido.<br>
+          Algumas coisas precisam ser atravessadas.
+        </p>
+        <button id="enterBtn">Entrar</button>
+      </div>
+    </section>
 
-<div id="library" class="screen">
-  <h2>Biblioteca do Limiar</h2>
-  <p class="small">Explore.</p>
-  <div class="divider"></div>
-  <button onclick="go('frag1')">Mesa · Constitucional</button>
-  <button onclick="go('frag2')">Estante · Administrativo</button>
-  <button onclick="go('frag3')">Mapa · Processo Legislativo</button>
-</div>
+    <section id="screen-explore" class="screen">
+      <div class="tag">Explorar</div>
+      <h2>Biblioteca do Limiar</h2>
+      <p class="small">Escolha um fragmento para atravessar.</p>
+      <div id="fragmentList"></div>
+    </section>
 
-<div id="frag1" class="screen">
-  <p>A dignidade da pessoa humana é fundamento da República Federativa do Brasil.</p>
-  <div class="choice">
-    <button onclick="feedback('✔️ Fragmento compreendido.')">Verdadeiro</button>
-    <button onclick="feedback('🔁 Fragmento instável.')">Falso</button>
-    <button onclick="go('dica1')">Estou em dúvida</button>
-  </div>
-</div>
+    <section id="screen-fragment" class="screen">
+      <div class="tag" id="fragmentLocation"></div>
+      <h2 id="fragmentTitle"></h2>
+      <p id="fragmentText"></p>
+      <p class="status" id="fragmentStatus"></p>
+      <div class="divider"></div>
+      <button id="btnTrue">Verdadeiro</button>
+      <button id="btnFalse">Falso</button>
+      <button class="secondary" id="btnDoubt">Estou em dúvida</button>
+    </section>
 
-<div id="dica1" class="screen">
-  <p class="small">Como você quer pensar isso?</p>
-  <button>🧩 SO CI DI VA PLU</button>
-  <button onclick="go('frag1')">Voltar à afirmação</button>
-</div>
+    <section id="screen-hints" class="screen">
+      <div class="tag">Estou em dúvida</div>
+      <h2>Dicas sob demanda</h2>
+      <p class="small" id="hintPrompt"></p>
+      <div class="hint-grid" id="hintButtons"></div>
+      <div class="card" id="hintContent" style="display:none;"></div>
+      <button class="secondary" id="backToFragment">Voltar ao fragmento</button>
+    </section>
 
-<div id="frag2" class="screen">
-  <p>O princípio da eficiência não se aplica ao Poder Legislativo.</p>
-  <div class="choice">
-    <button onclick="feedback('🔁 Fragmento instável.')">Verdadeiro</button>
-    <button onclick="feedback('✔️ Fragmento compreendido.')">Falso</button>
-    <button onclick="go('library')">Estou em dúvida</button>
-  </div>
-</div>
+    <section id="screen-feedback" class="screen">
+      <div class="tag">Retorno</div>
+      <h2 id="feedbackTitle"></h2>
+      <p id="feedbackText"></p>
+      <div class="card" id="feedbackDetail" style="display:none;"></div>
+      <button id="backToExplore">Voltar à biblioteca</button>
+    </section>
 
-<div id="frag3" class="screen">
-  <p>A iniciativa das leis complementares pode ser exercida por qualquer deputado.</p>
-  <div class="choice">
-    <button onclick="feedback('🔁 Fragmento instável.')">Verdadeiro</button>
-    <button onclick="feedback('✔️ Fragmento compreendido.')">Falso</button>
-    <button onclick="go('library')">Estou em dúvida</button>
-  </div>
-</div>
+    <section id="screen-review" class="screen">
+      <div class="tag">Voltar depois</div>
+      <h2>Revisões silenciosas</h2>
+      <p class="small">Fragmentos organizados por tempo de retorno.</p>
+      <div id="reviewList" class="card"></div>
+    </section>
 
-<div id="feedback" class="screen">
-  <p id="fbtext"></p>
-  <button onclick="go('library')">Voltar à biblioteca</button>
-</div>
+    <section id="screen-diary" class="screen">
+      <div class="tag">Diário</div>
+      <h2>Registro subjetivo</h2>
+      <p class="small">O que esse fragmento te fez pensar hoje?</p>
+      <textarea id="diaryInput" placeholder="Escreva livremente..."></textarea>
+      <p class="small" id="diaryStatus"></p>
+    </section>
+  </main>
 
-<script>
-function go(id){
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function feedback(text){
-  document.getElementById('fbtext').innerText = text;
-  go('feedback');
-}
-</script>
+  <nav class="menu" id="mainMenu" style="display:none;">
+    <button data-screen="screen-explore" class="active">Explorar</button>
+    <button data-screen="screen-review">Voltar depois</button>
+    <button data-screen="screen-diary">Diário</button>
+  </nav>
 
+  <script>
+    const fragments = [
+      {
+        id: "frag-constitucional-1",
+        title: "Fragmento 01",
+        location: "Mesa · Constitucional",
+        text: "A dignidade da pessoa humana é fundamento da República Federativa do Brasil.",
+        answer: true,
+        rationale: "Art. 1º, III, da Constituição Federal consagra a dignidade da pessoa humana como fundamento da República.",
+        tips: {
+          lembrar: "SO CI DI VA PLU: a sigla dos fundamentos. Identifique 'DI' como dignidade da pessoa humana.",
+          pensar: "Se é fundamento, não é apenas objetivo. Fundamentos estão no Art. 1º.",
+          organizar: "Fundamentos (Art. 1º) ≠ Objetivos (Art. 3º). Faça o mapa mental dos dois blocos.",
+          eliminar: "Quando a banca fala em fundamento, descarte itens típicos de objetivos sociais."
+        }
+      },
+      {
+        id: "frag-constitucional-2",
+        title: "Fragmento 02",
+        location: "Mesa · Constitucional",
+        text: "Os direitos e garantias expressos na Constituição não excluem outros decorrentes do regime e dos princípios por ela adotados.",
+        answer: true,
+        rationale: "Art. 5º, § 2º, da Constituição Federal prevê a cláusula de abertura material dos direitos fundamentais.",
+        tips: {
+          lembrar: "Art. 5º, § 2º: catálogo aberto de direitos.",
+          pensar: "A Constituição admite direitos implícitos quando compatíveis com seus princípios.",
+          organizar: "Direitos expressos + direitos decorrentes do regime/princípios = conjunto protegido.",
+          eliminar: "Se a afirmação reconhece a abertura do catálogo, tende a estar correta."
+        }
+      },
+      {
+        id: "frag-constitucional-3",
+        title: "Fragmento 03",
+        location: "Mesa · Constitucional",
+        text: "A criação de partido político depende de autorização prévia do Estado.",
+        answer: false,
+        rationale: "A criação de partidos é livre, desde que respeitados a soberania nacional, o regime democrático e o pluripartidarismo (CF, art. 17).",
+        tips: {
+          lembrar: "Partidos têm autonomia e não precisam de autorização prévia.",
+          pensar: "A Constituição protege o pluralismo político.",
+          organizar: "Art. 17: liberdade partidária com requisitos constitucionais.",
+          eliminar: "Afirmações com 'autorização prévia do Estado' tendem a ser falsas."
+        }
+      },
+      {
+        id: "frag-administrativo-1",
+        title: "Fragmento 04",
+        location: "Estante · Administrativo",
+        text: "O princípio da eficiência não se aplica ao Poder Legislativo.",
+        answer: false,
+        rationale: "O princípio da eficiência é aplicável à administração pública direta e indireta de todos os Poderes (CF, art. 37).",
+        tips: {
+          lembrar: "O art. 37 começa com 'A administração pública... dos Poderes'.",
+          pensar: "A Constituição não criou exceção para o Legislativo.",
+          organizar: "Administração pública = Executivo, Legislativo e Judiciário quando atuam administrativamente.",
+          eliminar: "Se a frase exclui um Poder sem base expressa, tende a estar errada."
+        }
+      },
+      {
+        id: "frag-administrativo-2",
+        title: "Fragmento 05",
+        location: "Estante · Administrativo",
+        text: "A investidura em cargo ou emprego público depende de aprovação prévia em concurso público, ressalvadas as nomeações para cargo em comissão.",
+        answer: true,
+        rationale: "A regra do concurso público está no art. 37, II, com exceção para cargos em comissão.",
+        tips: {
+          lembrar: "Art. 37, II: concurso como regra, comissão como exceção.",
+          pensar: "Cargos em comissão são de livre nomeação e exoneração.",
+          organizar: "Regra geral + exceções explícitas para comissão.",
+          eliminar: "Afirmação alinhada ao art. 37, II tende a ser correta."
+        }
+      },
+      {
+        id: "frag-administrativo-3",
+        title: "Fragmento 06",
+        location: "Estante · Administrativo",
+        text: "A administração pública pode revogar seus próprios atos quando ilegais, por motivo de conveniência e oportunidade.",
+        answer: false,
+        rationale: "Atos ilegais são anulados; revogação ocorre por conveniência e oportunidade de atos válidos (Súmula 473/STF).",
+        tips: {
+          lembrar: "Anular = ilegalidade; revogar = mérito.",
+          pensar: "Não se revoga o que nasceu ilegal.",
+          organizar: "Controle interno: anulação x revogação.",
+          eliminar: "Misturar ilegalidade com revogação indica erro."
+        }
+      },
+      {
+        id: "frag-legislativo-1",
+        title: "Fragmento 07",
+        location: "Mapa · Processo Legislativo",
+        text: "A iniciativa das leis complementares pode ser exercida por qualquer deputado.",
+        answer: true,
+        rationale: "A iniciativa das leis complementares segue a regra geral, podendo ser proposta por qualquer membro do Congresso (CF, art. 61).",
+        tips: {
+          lembrar: "Iniciativa de lei complementar segue o regime geral do art. 61.",
+          pensar: "Restrições de iniciativa são exceções expressas.",
+          organizar: "Iniciativa geral x iniciativa reservada.",
+          eliminar: "Sem iniciativa privativa indicada, a regra é geral."
+        }
+      },
+      {
+        id: "frag-legislativo-2",
+        title: "Fragmento 08",
+        location: "Mapa · Processo Legislativo",
+        text: "A aprovação de emenda constitucional exige três quintos dos votos, em dois turnos, em cada Casa do Congresso Nacional.",
+        answer: true,
+        rationale: "Art. 60, § 2º, da Constituição Federal define o quórum e os dois turnos em cada Casa.",
+        tips: {
+          lembrar: "PEC = 3/5 + 2 turnos + Câmara e Senado.",
+          pensar: "Emenda constitucional tem rito mais rigoroso.",
+          organizar: "Quórum qualificado x quórum simples.",
+          eliminar: "Se faltar algum elemento (3/5, dois turnos, cada Casa), está errado."
+        }
+      },
+      {
+        id: "frag-legislativo-3",
+        title: "Fragmento 09",
+        location: "Mapa · Processo Legislativo",
+        text: "Medida provisória perde eficácia desde a edição se não for convertida em lei em até sessenta dias, prorrogáveis uma vez por igual período.",
+        answer: true,
+        rationale: "A MP tem prazo de 60 dias prorrogável por mais 60; se não convertida, perde eficácia (CF, art. 62).",
+        tips: {
+          lembrar: "MP: 60 + 60 dias.",
+          pensar: "Perde eficácia se não houver conversão.",
+          organizar: "Prazo inicial e prorrogação automática.",
+          eliminar: "Se o prazo for diferente do 60+60, tende a estar errado."
+        }
+      }
+    ];
+
+    const levels = [
+      { label: "Instável", days: 1 },
+      { label: "Assistido", days: 3 },
+      { label: "Compreendido", days: 7 },
+      { label: "Revisão leve", days: 15 },
+      { label: "Revisão leve", days: 45 }
+    ];
+
+    const state = {
+      currentFragment: null,
+      rainActive: false,
+      progress: loadProgress()
+    };
+
+    let rainContext = null;
+    let rainSource = null;
+    let rainGain = null;
+    let rainFilter = null;
+
+    const screens = Array.from(document.querySelectorAll('.screen'));
+    const menu = document.getElementById('mainMenu');
+
+    function showScreen(id) {
+      screens.forEach(screen => screen.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if (id === 'screen-start') {
+        menu.style.display = 'none';
+      } else {
+        menu.style.display = 'flex';
+        menu.querySelectorAll('button').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.screen === id);
+        });
+      }
+    }
+
+    function loadProgress() {
+      try {
+        return JSON.parse(localStorage.getItem('limiar-progress')) || {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function saveProgress() {
+      localStorage.setItem('limiar-progress', JSON.stringify(state.progress));
+    }
+
+    function getFragmentProgress(id) {
+      if (!state.progress[id]) {
+        state.progress[id] = { level: 0, dueAt: null };
+      }
+      return state.progress[id];
+    }
+
+    function scheduleNext(id, correct) {
+      const progress = getFragmentProgress(id);
+      const now = new Date();
+      if (correct) {
+        progress.level = Math.min(progress.level + 1, levels.length - 1);
+      } else if (progress.level < 3) {
+        progress.level = 0;
+      }
+      const days = levels[progress.level].days;
+      progress.dueAt = new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
+      saveProgress();
+    }
+
+    function formatDue(dueAt) {
+      if (!dueAt) return 'Sem agendamento';
+      const now = new Date();
+      const due = new Date(dueAt);
+      const diff = Math.ceil((due - now) / (24 * 60 * 60 * 1000));
+      if (diff <= 0) return 'Rever hoje';
+      if (diff === 1) return 'Rever amanhã';
+      return `Rever em ${diff} dias`;
+    }
+
+    function renderFragments() {
+      const list = document.getElementById('fragmentList');
+      list.innerHTML = '';
+      fragments.forEach(fragment => {
+        const progress = getFragmentProgress(fragment.id);
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="small">${fragment.location}</div>
+          <h3>${fragment.title}</h3>
+          <p class="small">${levels[progress.level].label} · ${formatDue(progress.dueAt)}</p>
+          <button>Entrar no fragmento</button>
+        `;
+        card.querySelector('button').addEventListener('click', () => openFragment(fragment.id));
+        list.appendChild(card);
+      });
+    }
+
+    function openFragment(id) {
+      const fragment = fragments.find(item => item.id === id);
+      state.currentFragment = fragment;
+      const progress = getFragmentProgress(id);
+      document.getElementById('fragmentLocation').textContent = fragment.location;
+      document.getElementById('fragmentTitle').textContent = fragment.title;
+      document.getElementById('fragmentText').textContent = fragment.text;
+      document.getElementById('fragmentStatus').textContent = `${levels[progress.level].label} · ${formatDue(progress.dueAt)}`;
+      showScreen('screen-fragment');
+    }
+
+    function renderHints() {
+      const fragment = state.currentFragment;
+      document.getElementById('hintPrompt').textContent = fragment.text;
+      const buttons = document.getElementById('hintButtons');
+      const hintContent = document.getElementById('hintContent');
+      hintContent.style.display = 'none';
+      hintContent.textContent = '';
+      const hints = [
+        { key: 'lembrar', label: 'Lembrar', icon: '🧩' },
+        { key: 'pensar', label: 'Pensar', icon: '🧠' },
+        { key: 'organizar', label: 'Organizar', icon: '🗺️' },
+        { key: 'eliminar', label: 'Eliminar', icon: '🧹' }
+      ];
+      buttons.innerHTML = '';
+      hints.forEach(hint => {
+        const btn = document.createElement('button');
+        btn.textContent = `${hint.icon} ${hint.label}`;
+        btn.addEventListener('click', () => {
+          hintContent.style.display = 'block';
+          hintContent.textContent = fragment.tips[hint.key];
+        });
+        buttons.appendChild(btn);
+      });
+      showScreen('screen-hints');
+    }
+
+    function showFeedback(correct) {
+      const fragment = state.currentFragment;
+      const feedbackTitle = document.getElementById('feedbackTitle');
+      const feedbackText = document.getElementById('feedbackText');
+      const feedbackDetail = document.getElementById('feedbackDetail');
+      if (correct) {
+        feedbackTitle.textContent = 'Fragmento compreendido';
+        feedbackText.textContent = 'Você atravessou com clareza. O ritmo segue silencioso.';
+        feedbackDetail.style.display = 'none';
+      } else {
+        feedbackTitle.textContent = 'Fragmento instável';
+        feedbackText.textContent = `Resposta correta: ${fragment.answer ? 'Verdadeiro' : 'Falso'}.`;
+        feedbackDetail.style.display = 'block';
+        feedbackDetail.innerHTML = `<strong>Por quê:</strong> ${fragment.rationale}`;
+      }
+      showScreen('screen-feedback');
+    }
+
+    function renderReviewList() {
+      const list = document.getElementById('reviewList');
+      const items = fragments.map(fragment => {
+        const progress = getFragmentProgress(fragment.id);
+        return {
+          fragment,
+          progress,
+          dueAt: progress.dueAt ? new Date(progress.dueAt) : null
+        };
+      }).sort((a, b) => {
+        if (!a.dueAt && !b.dueAt) return 0;
+        if (!a.dueAt) return 1;
+        if (!b.dueAt) return -1;
+        return a.dueAt - b.dueAt;
+      });
+
+      list.innerHTML = '';
+      if (!items.length) {
+        list.textContent = 'Nenhum fragmento registrado.';
+        return;
+      }
+
+      items.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'list-item';
+        row.innerHTML = `
+          <div class="small">🔁 ${item.fragment.title}</div>
+          <div>${item.fragment.location}</div>
+          <div class="small">${formatDue(item.progress.dueAt)}</div>
+        `;
+        row.addEventListener('click', () => openFragment(item.fragment.id));
+        list.appendChild(row);
+      });
+    }
+
+    function initMenu() {
+      menu.querySelectorAll('button').forEach(button => {
+        button.addEventListener('click', () => {
+          const target = button.dataset.screen;
+          if (target === 'screen-explore') {
+            renderFragments();
+          }
+          if (target === 'screen-review') {
+            renderReviewList();
+          }
+          showScreen(target);
+        });
+      });
+    }
+
+    document.getElementById('enterBtn').addEventListener('click', () => {
+      renderFragments();
+      showScreen('screen-explore');
+    });
+
+    document.getElementById('btnDoubt').addEventListener('click', renderHints);
+    document.getElementById('backToFragment').addEventListener('click', () => showScreen('screen-fragment'));
+
+    document.getElementById('btnTrue').addEventListener('click', () => {
+      const correct = state.currentFragment.answer === true;
+      scheduleNext(state.currentFragment.id, correct);
+      showFeedback(correct);
+      renderFragments();
+      renderReviewList();
+    });
+
+    document.getElementById('btnFalse').addEventListener('click', () => {
+      const correct = state.currentFragment.answer === false;
+      scheduleNext(state.currentFragment.id, correct);
+      showFeedback(correct);
+      renderFragments();
+      renderReviewList();
+    });
+
+    document.getElementById('backToExplore').addEventListener('click', () => {
+      renderFragments();
+      showScreen('screen-explore');
+    });
+
+    document.getElementById('rainToggle').addEventListener('click', (event) => {
+      state.rainActive = !state.rainActive;
+      event.target.classList.toggle('rain-active', state.rainActive);
+      if (state.rainActive) {
+        startRain();
+      } else {
+        stopRain();
+      }
+      event.target.textContent = state.rainActive ? 'Chuva ativa' : 'Ativar chuva';
+    });
+
+    const diaryInput = document.getElementById('diaryInput');
+    const diaryStatus = document.getElementById('diaryStatus');
+    diaryInput.value = localStorage.getItem('limiar-diary') || '';
+    diaryInput.addEventListener('input', () => {
+      localStorage.setItem('limiar-diary', diaryInput.value);
+      diaryStatus.textContent = 'Salvo automaticamente.';
+      clearTimeout(diaryInput._timer);
+      diaryInput._timer = setTimeout(() => {
+        diaryStatus.textContent = '';
+      }, 2000);
+    });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js');
+    }
+
+    initMenu();
+
+    function startRain() {
+      if (!rainContext) {
+        rainContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (rainContext.state === 'suspended') {
+        rainContext.resume();
+      }
+      if (rainSource) return;
+      const buffer = rainContext.createBuffer(1, rainContext.sampleRate * 2, rainContext.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i += 1) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      const source = rainContext.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      const highpass = rainContext.createBiquadFilter();
+      highpass.type = 'highpass';
+      highpass.frequency.value = 500;
+      const lowpass = rainContext.createBiquadFilter();
+      lowpass.type = 'lowpass';
+      lowpass.frequency.value = 2500;
+      const gain = rainContext.createGain();
+      gain.gain.value = 0.12;
+      source.connect(highpass);
+      highpass.connect(lowpass);
+      lowpass.connect(gain);
+      gain.connect(rainContext.destination);
+      source.start();
+      rainSource = source;
+      rainGain = gain;
+      rainFilter = { highpass, lowpass };
+    }
+
+    function stopRain() {
+      if (rainSource) {
+        rainSource.stop();
+        rainSource.disconnect();
+      }
+      if (rainGain) {
+        rainGain.disconnect();
+      }
+      if (rainFilter) {
+        rainFilter.highpass.disconnect();
+        rainFilter.lowpass.disconnect();
+      }
+      rainSource = null;
+      rainGain = null;
+      rainFilter = null;
+    }
+  </script>
 </body>
 </html>
