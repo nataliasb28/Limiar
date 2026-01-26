@@ -107,6 +107,14 @@
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
     }
 
+    .card.book {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-left: 4px solid rgba(194, 154, 91, 0.6);
+      background: linear-gradient(140deg, rgba(26, 32, 48, 0.95) 0%, rgba(14, 18, 30, 0.9) 100%);
+    }
+
     .menu {
       position: fixed;
       left: 0;
@@ -198,6 +206,20 @@
       color: var(--accent);
     }
 
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .section-header button {
+      width: auto;
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+
     .list-item {
       padding: 14px 0;
       border-bottom: 1px solid var(--divider);
@@ -282,6 +304,12 @@
       color: rgba(230, 220, 200, 0.55);
     }
 
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
     .library-scene {
       position: fixed;
       inset: 0;
@@ -298,9 +326,9 @@
       height: 55vh;
       position: relative;
       border-radius: 24px 24px 40px 40px;
-      background: linear-gradient(180deg, rgba(12, 15, 26, 0.92) 0%, rgba(7, 9, 15, 0.95) 100%);
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(200, 190, 170, 0.12);
+      background: linear-gradient(180deg, rgba(18, 23, 38, 0.96) 0%, rgba(7, 9, 15, 0.96) 100%);
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(200, 190, 170, 0.18);
       overflow: hidden;
     }
 
@@ -330,6 +358,15 @@
       overflow: hidden;
     }
 
+    .shelf::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-top: 1px solid rgba(200, 180, 140, 0.18);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+      opacity: 0.4;
+    }
+
     .shelf::before {
       content: "";
       position: absolute;
@@ -347,7 +384,7 @@
       width: 55%;
       height: 18%;
       transform: translateX(-50%);
-      background: linear-gradient(180deg, rgba(70, 50, 35, 0.8) 0%, rgba(40, 28, 20, 0.9) 100%);
+      background: linear-gradient(180deg, rgba(90, 65, 45, 0.85) 0%, rgba(40, 28, 20, 0.92) 100%);
       border-radius: 16px;
       box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
       border: 1px solid rgba(180, 150, 110, 0.2);
@@ -449,7 +486,19 @@
     <section id="screen-explore" class="screen">
       <div class="tag">Explorar</div>
       <h2>Biblioteca do Limiar</h2>
-      <p class="small">Escolha um fragmento para atravessar.</p>
+      <p class="small">Escolha um livro para acessar os fragmentos da matéria.</p>
+      <div class="subject-grid" id="subjectList"></div>
+    </section>
+
+    <section id="screen-subject" class="screen">
+      <div class="section-header">
+        <div>
+          <div class="tag" id="subjectTag"></div>
+          <h2 id="subjectTitle"></h2>
+        </div>
+        <button class="secondary" id="backToSubjects">Voltar</button>
+      </div>
+      <p class="small" id="subjectDescription"></p>
       <div id="fragmentList"></div>
     </section>
 
@@ -504,9 +553,31 @@
   </nav>
 
   <script>
+    const subjects = [
+      {
+        id: "constitucional",
+        title: "Constitucional",
+        location: "Ala Norte · Estante Alta",
+        description: "Fundamentos, direitos fundamentais e organização do Estado."
+      },
+      {
+        id: "administrativo",
+        title: "Administrativo",
+        location: "Ala Central · Estante de Bronze",
+        description: "Princípios, atos administrativos e organização da administração pública."
+      },
+      {
+        id: "processo-legislativo",
+        title: "Processo Legislativo",
+        location: "Ala Sul · Mapa das Leis",
+        description: "Ritos legislativos, quóruns e produção normativa."
+      }
+    ];
+
     const fragments = [
       {
         id: "frag-constitucional-1",
+        subject: "constitucional",
         title: "Fragmento 01",
         location: "Mesa · Constitucional",
         text: "A dignidade da pessoa humana é fundamento da República Federativa do Brasil.",
@@ -521,6 +592,7 @@
       },
       {
         id: "frag-constitucional-2",
+        subject: "constitucional",
         title: "Fragmento 02",
         location: "Mesa · Constitucional",
         text: "Os direitos e garantias expressos na Constituição não excluem outros decorrentes do regime e dos princípios por ela adotados.",
@@ -535,6 +607,7 @@
       },
       {
         id: "frag-constitucional-3",
+        subject: "constitucional",
         title: "Fragmento 03",
         location: "Mesa · Constitucional",
         text: "A criação de partido político depende de autorização prévia do Estado.",
@@ -549,6 +622,7 @@
       },
       {
         id: "frag-administrativo-1",
+        subject: "administrativo",
         title: "Fragmento 04",
         location: "Estante · Administrativo",
         text: "O princípio da eficiência não se aplica ao Poder Legislativo.",
@@ -563,6 +637,7 @@
       },
       {
         id: "frag-administrativo-2",
+        subject: "administrativo",
         title: "Fragmento 05",
         location: "Estante · Administrativo",
         text: "A investidura em cargo ou emprego público depende de aprovação prévia em concurso público, ressalvadas as nomeações para cargo em comissão.",
@@ -577,6 +652,7 @@
       },
       {
         id: "frag-administrativo-3",
+        subject: "administrativo",
         title: "Fragmento 06",
         location: "Estante · Administrativo",
         text: "A administração pública pode revogar seus próprios atos quando ilegais, por motivo de conveniência e oportunidade.",
@@ -591,6 +667,7 @@
       },
       {
         id: "frag-legislativo-1",
+        subject: "processo-legislativo",
         title: "Fragmento 07",
         location: "Mapa · Processo Legislativo",
         text: "A iniciativa das leis complementares pode ser exercida por qualquer deputado.",
@@ -605,6 +682,7 @@
       },
       {
         id: "frag-legislativo-2",
+        subject: "processo-legislativo",
         title: "Fragmento 08",
         location: "Mapa · Processo Legislativo",
         text: "A aprovação de emenda constitucional exige três quintos dos votos, em dois turnos, em cada Casa do Congresso Nacional.",
@@ -619,6 +697,7 @@
       },
       {
         id: "frag-legislativo-3",
+        subject: "processo-legislativo",
         title: "Fragmento 09",
         location: "Mapa · Processo Legislativo",
         text: "Medida provisória perde eficácia desde a edição se não for convertida em lei em até sessenta dias, prorrogáveis uma vez por igual período.",
@@ -644,6 +723,7 @@
     const state = {
       currentFragment: null,
       rainActive: false,
+      currentSubject: null,
       progress: loadProgress()
     };
 
@@ -710,10 +790,28 @@
       return `Rever em ${diff} dias`;
     }
 
-    function renderFragments() {
+    function renderSubjects() {
+      const list = document.getElementById('subjectList');
+      list.innerHTML = '';
+      subjects.forEach(subject => {
+        const card = document.createElement('div');
+        card.className = 'card book';
+        card.innerHTML = `
+          <div class="small">${subject.location}</div>
+          <h3>${subject.title}</h3>
+          <p class="small">${subject.description}</p>
+          <button>Selecionar livro</button>
+        `;
+        card.querySelector('button').addEventListener('click', () => openSubject(subject.id));
+        list.appendChild(card);
+      });
+    }
+
+    function renderFragments(subjectId) {
       const list = document.getElementById('fragmentList');
       list.innerHTML = '';
-      fragments.forEach(fragment => {
+      const filtered = subjectId ? fragments.filter(fragment => fragment.subject === subjectId) : fragments;
+      filtered.forEach(fragment => {
         const progress = getFragmentProgress(fragment.id);
         const card = document.createElement('div');
         card.className = 'card';
@@ -726,6 +824,16 @@
         card.querySelector('button').addEventListener('click', () => openFragment(fragment.id));
         list.appendChild(card);
       });
+    }
+
+    function openSubject(subjectId) {
+      const subject = subjects.find(item => item.id === subjectId);
+      state.currentSubject = subject;
+      document.getElementById('subjectTag').textContent = subject.location;
+      document.getElementById('subjectTitle').textContent = `Livro · ${subject.title}`;
+      document.getElementById('subjectDescription').textContent = subject.description;
+      renderFragments(subjectId);
+      showScreen('screen-subject');
     }
 
     function openFragment(id) {
@@ -823,7 +931,7 @@
         button.addEventListener('click', () => {
           const target = button.dataset.screen;
           if (target === 'screen-explore') {
-            renderFragments();
+            renderSubjects();
           }
           if (target === 'screen-review') {
             renderReviewList();
@@ -834,7 +942,7 @@
     }
 
     document.getElementById('enterBtn').addEventListener('click', () => {
-      renderFragments();
+      renderSubjects();
       showScreen('screen-explore');
     });
 
@@ -845,7 +953,9 @@
       const correct = state.currentFragment.answer === true;
       scheduleNext(state.currentFragment.id, correct);
       showFeedback(correct);
-      renderFragments();
+      if (state.currentSubject) {
+        renderFragments(state.currentSubject.id);
+      }
       renderReviewList();
     });
 
@@ -853,12 +963,25 @@
       const correct = state.currentFragment.answer === false;
       scheduleNext(state.currentFragment.id, correct);
       showFeedback(correct);
-      renderFragments();
+      if (state.currentSubject) {
+        renderFragments(state.currentSubject.id);
+      }
       renderReviewList();
     });
 
     document.getElementById('backToExplore').addEventListener('click', () => {
-      renderFragments();
+      if (state.currentSubject) {
+        renderFragments(state.currentSubject.id);
+        showScreen('screen-subject');
+      } else {
+        renderSubjects();
+        showScreen('screen-explore');
+      }
+    });
+
+    document.getElementById('backToSubjects').addEventListener('click', () => {
+      state.currentSubject = null;
+      renderSubjects();
       showScreen('screen-explore');
     });
 
@@ -890,6 +1013,7 @@
     }
 
     initMenu();
+    renderSubjects();
 
     function startRain() {
       if (!rainContext) {
