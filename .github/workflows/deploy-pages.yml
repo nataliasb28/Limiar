@@ -1,6 +1,8 @@
-name: Deploy Limiar to GitHub Pages
+name: Build and Deploy Limiar
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
   workflow_dispatch:
@@ -11,7 +13,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -34,14 +36,17 @@ jobs:
         run: npm run build
 
       - name: Configure Pages
+        if: github.event_name == 'push'
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
+        if: github.event_name == 'push'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
   deploy:
+    if: github.event_name == 'push'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
