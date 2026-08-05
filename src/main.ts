@@ -4,7 +4,7 @@ import './style.css';
 const W = 1280;
 const H = 720;
 const LIBRARY_IMAGE = 'https://cdn.loc.gov/service/pnp/ds/06600/06610v.jpg';
-const RAIN_AUDIO = 'https://rainsoundsforsleeping.com/audio/rain-base.mp3';
+const RAIN_AUDIO = 'https://rainsoundsforsleeping.com/rain-base.mp3';
 
 type Clue = {
   id: string;
@@ -17,8 +17,8 @@ type Clue = {
 };
 
 function makeBook(scene: Phaser.Scene, x: number, y: number) {
-  const cover = scene.add.rectangle(0, 0, 42, 68, 0x5c2a26).setStrokeStyle(2, 0xb89a62);
   const pages = scene.add.rectangle(5, 0, 31, 58, 0xd8c9a7);
+  const cover = scene.add.rectangle(0, 0, 42, 68, 0x5c2a26).setStrokeStyle(2, 0xb89a62);
   const spine = scene.add.rectangle(-18, 0, 6, 66, 0x2a1312);
   return scene.add.container(x, y, [pages, cover, spine]).setRotation(-0.12);
 }
@@ -82,16 +82,13 @@ class LibraryScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#08090c');
     const bg = this.add.image(W / 2, H / 2, 'library').setDisplaySize(W, H).setTint(0xb9a88b);
     bg.setAlpha(0.92);
-
     this.add.rectangle(W / 2, H / 2, W, H, 0x05070a, 0.28);
     this.add.rectangle(W / 2, H - 88, W, 176, 0x05070a, 0.36);
-
     this.createRainWindowEffect();
     this.createHeader();
     this.createClues();
     this.createAudioControls();
     this.showIntro();
-
     this.rainAudio.loop = true;
     this.rainAudio.volume = 0.28;
   }
@@ -108,11 +105,10 @@ class LibraryScene extends Phaser.Scene {
   }
 
   private createHeader() {
-    const bar = this.add.rectangle(W / 2, 54, W, 108, 0x05070a, 0.68).setDepth(10);
+    this.add.rectangle(W / 2, 54, W, 108, 0x05070a, 0.68).setDepth(10);
     this.add.text(34, 23, 'LIMIAR', { fontFamily: 'Georgia, serif', fontSize: '30px', color: '#f3ead8', letterSpacing: 7 }).setDepth(11);
     this.add.text(36, 65, 'A PRIMEIRA BIBLIOTECA', { fontFamily: 'Arial, sans-serif', fontSize: '11px', color: '#c2a66e', letterSpacing: 3 }).setDepth(11);
     this.counter = this.add.text(1195, 36, 'Pistas 0/5', { fontFamily: 'Georgia, serif', fontSize: '18px', color: '#ead5ae' }).setOrigin(1, 0).setDepth(11);
-    void bar;
   }
 
   private createClues() {
@@ -123,12 +119,14 @@ class LibraryScene extends Phaser.Scene {
 
       zone.on('pointerover', () => {
         if (this.found.has(clue.id)) return;
-        this.tweens.add({ targets: [object, halo], alpha: object === halo ? 0.18 : 1, scale: 1, duration: 180 });
+        this.tweens.add({ targets: object, alpha: 1, scale: 1, duration: 180 });
+        this.tweens.add({ targets: halo, alpha: 0.18, duration: 180 });
         halo.setFillStyle(0xd8b36a, 0.12).setStrokeStyle(2, 0xf1d494, 0.65);
       });
       zone.on('pointerout', () => {
         if (this.found.has(clue.id)) return;
         this.tweens.add({ targets: object, alpha: 0.72, scale: 0.86, duration: 180 });
+        this.tweens.add({ targets: halo, alpha: 0, duration: 180 });
         halo.setFillStyle(0xd8b36a, 0).setStrokeStyle(2, 0xf1d494, 0);
       });
       zone.on('pointerup', () => this.discover(clue, object, halo));
@@ -151,7 +149,6 @@ class LibraryScene extends Phaser.Scene {
     this.rainButton = this.add.text(1215, 76, '🌧  chuva: desligada', {
       fontFamily: 'Arial, sans-serif', fontSize: '14px', color: '#e7d5b7', backgroundColor: '#141820', padding: { x: 12, y: 8 },
     }).setOrigin(1, 0).setDepth(12).setInteractive({ cursor: 'pointer' });
-
     this.rainButton.on('pointerup', async () => {
       this.rainOn = !this.rainOn;
       if (this.rainOn) {
